@@ -1,5 +1,3 @@
-// src/services/authService.js
-// src/services/authService.js
 import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, set, ref, database } from './firebase';
 
 
