@@ -1,8 +1,10 @@
 // src/pages/SignupPage.jsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/authService';
 
-const SignupPage = ({ history }) => {
+const SignupPage = () => {
+    const navigate = useNavigate();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -19,7 +21,7 @@ const SignupPage = ({ history }) => {
         setLoading(true);
         try {
             await signup(firstName, lastName, email, password);
-            history.push('/login');
+            navigate('/login');
         } catch (err) {
             setError(err.message);
             setLoading(false);
@@ -60,11 +62,11 @@ const SignupPage = ({ history }) => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
             /><br />
             <button onClick={handleSignup} disabled={loading}>
-                {loading ? 'Signing up...' : 'Sign UP'}
+                {loading ? 'Signing up...' : 'Sign Up'}
             </button>
             {error && <div>{error}</div>}
             <div>
-                Already a member? <button onClick={() => history.push('/login')}>Login</button>
+                Already a member? <button onClick={() => navigate('/login')}>Login</button>
             </div>
         </div>
     );

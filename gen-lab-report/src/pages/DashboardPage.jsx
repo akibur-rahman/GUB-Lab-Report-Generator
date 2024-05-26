@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { get, ref, set } from '../services/firebase';
 import { auth } from '../services/firebase';
+import { getDatabase } from 'firebase/database';
+
+const database = getDatabase();
 
 const DashboardPage = ({ history }) => {
     const [apiKey, setApiKey] = useState('');
