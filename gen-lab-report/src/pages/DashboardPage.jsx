@@ -1,14 +1,15 @@
-// src/pages/DashboardPage.jsx
 import React, { useState, useEffect } from 'react';
 import { get, ref, set } from '../services/firebase';
 import { auth } from '../services/firebase';
 import { getDatabase } from 'firebase/database';
+import { useNavigate } from 'react-router-dom';
 
 const database = getDatabase();
 
-const DashboardPage = ({ history }) => {
+const DashboardPage = () => {
     const [apiKey, setApiKey] = useState('');
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchApiKey = async () => {

@@ -1,13 +1,22 @@
 // src/services/authService.js
-import { auth } from './firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+// src/services/authService.js
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, set, ref, database } from './firebase';
+
 
 export const signup = async (firstName, lastName, email, password) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+
+        // Save additional user information to the database
+        await set(ref(database, 'users/' + user.uid), {
+            firstName,
+            lastName,
+            email,
+            apiKey: ''
+        });
+
         console.log('User signed up:', user);
-        // Optionally save additional user information to your database here
     } catch (error) {
         throw new Error(error.message);
     }

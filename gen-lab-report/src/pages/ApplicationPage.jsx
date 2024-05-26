@@ -1,21 +1,24 @@
-// src/pages/ApplicationPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getGeminiResponse } from '../services/chatService';
 import { generatePDF } from '../services/pdfService';
 import { logout } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
+import promptsData from '../models/prompts.json'; // Import prompts data
 
-const ApplicationPage = ({ history }) => {
-    const [formData, setFormData] = useState({
-        title: '',
-        objectives: '',
-        procedure: '',
-        implementation: '',
-        output: '',
-        discussion: '',
-        summary: ''
-    });
+const ApplicationPage = () => {
+    const [formData, setFormData] = useState({});
     const [responses, setResponses] = useState({});
     const [additionalInfo, setAdditionalInfo] = useState('');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Initialize formData with prompts from promptsData
+        const initialFormData = {};
+        for (const key in promptsData) {
+            initialFormData[key] = '';
+        }
+        setFormData(initialFormData);
+    }, []);
 
     const handleGenerate = async (key) => {
         try {
@@ -36,7 +39,7 @@ const ApplicationPage = ({ history }) => {
 
     const handleLogout = async () => {
         await logout();
-        history.push('/login');
+        navigate('/login');
     };
 
     return (
@@ -44,12 +47,12 @@ const ApplicationPage = ({ history }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div>Profile Banner</div>
                 <div>
-                    <button onClick={() => history.push('/dashboard')}>Dashboard</button>
+                    <button onClick={() => navigate('/dashboard')}>Dashboard</button>
                     <button onClick={handleLogout}>Logout</button>
                 </div>
             </div>
             <h1>Lab Report Generator</h1>
-            {['title', 'objectives', 'procedure', 'implementation', 'output', 'discussion', 'summary'].map(key => (
+            {Object.keys(formData).map(key => (
                 <div key={key} style={{ margin: '20px 0' }}>
                     <h2>{key.toUpperCase()}</h2>
                     <textarea
