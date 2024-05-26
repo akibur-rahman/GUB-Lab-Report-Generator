@@ -1,6 +1,5 @@
 import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, set, ref, database } from './firebase';
 
-
 export const signup = async (firstName, lastName, email, password) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -20,11 +19,12 @@ export const signup = async (firstName, lastName, email, password) => {
     }
 };
 
-export const login = async (email, password) => {
+export const login = async (email, password, navigate) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         console.log('User logged in:', user);
+        navigate('/app'); // Redirect to the application page after successful login
     } catch (error) {
         throw new Error(error.message);
     }

@@ -4,11 +4,19 @@ import { generatePDF } from '../services/pdfService';
 import { logout } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import promptsData from '../models/prompts.json'; // Import prompts data
+import { get, ref } from 'firebase/database';
+import { auth, database } from '../services/firebase'; // Assuming you have Firebase service imported
 
 const ApplicationPage = () => {
     const [formData, setFormData] = useState({});
     const [responses, setResponses] = useState({});
     const [additionalInfo, setAdditionalInfo] = useState('');
+    const [userData, setUserData] = useState({
+        apiKey: '',
+        firstName: '',
+        lastName: '',
+        userId: '',
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -18,6 +26,32 @@ const ApplicationPage = () => {
             initialFormData[key] = '';
         }
         setFormData(initialFormData);
+
+        // Fetch the user's data when the component mounts
+        const fetchUserData = async () => {
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    const userSnapshot = await get(ref(database, 'users/' + user.uid));
+                    const userData = userSnapshot.val();
+                    if (userData) {
+                        setUserData({
+                            userId: user.uid,
+                            apiKey: userData.apiKey || '',
+                            firstName: userData.firstName || '',
+                            lastName: userData.lastName || '',
+                        });
+                    } else {
+                        console.warn('User data not found for user:', user.uid);
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            } else {
+                console.warn('User is not authenticated');
+            }
+        };
+        fetchUserData();
     }, []);
 
     const handleGenerate = async (key) => {
@@ -45,8 +79,13 @@ const ApplicationPage = () => {
     return (
         <div style={{ padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div>Profile Banner</div>
                 <div>
+                    <p>Profile Banner</p>
+                    <p>User ID: {userData.userId || 'Loading...'}</p>
+                    <p>Name: {userData.firstName} {userData.lastName}</p>
+                </div>
+                <div>
+                    <p style={{ textAlign: 'center' }}>API Key: {userData.apiKey || 'Loading...'}</p>
                     <button onClick={() => navigate('/dashboard')}>Dashboard</button>
                     <button onClick={handleLogout}>Logout</button>
                 </div>
