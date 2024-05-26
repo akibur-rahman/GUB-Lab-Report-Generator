@@ -11,7 +11,7 @@ const LoginPage = () => {
         // Implement your login logic here
         // For example, authenticate the user and redirect to the dashboard
         console.log('Login attempted with', { email, password });
-        navigate('/dashboard'); // Redirect to the dashboard after successful login
+        navigate('/app'); // Redirect to the dashboard after successful login
     };
 
     const handleSignupClick = () => {
