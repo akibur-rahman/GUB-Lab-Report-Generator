@@ -52,7 +52,7 @@ const ApplicationPage = () => {
             }
         };
         fetchUserData();
-    }, []);
+    });
 
     const handleGenerate = async (key) => {
         try {
