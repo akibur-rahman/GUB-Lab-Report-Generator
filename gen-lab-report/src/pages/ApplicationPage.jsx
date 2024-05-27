@@ -23,6 +23,7 @@ const ApplicationPage = () => {
     });
     const [conversationHistory, setConversationHistory] = useState([]);
     const [labTitle, setLabTitle] = useState('');
+    const [isInitiated, setIsInitiated] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -64,13 +65,13 @@ const ApplicationPage = () => {
     }, []);
 
     const handleGenerate = async (key) => {
-        if (key === "TITLE_OF_THE_LAB_EXPERIMENT" && !labTitle.trim()) {
+        if (key === "Title Of The Lab Experiment" && !labTitle.trim()) {
             alert('Please enter a title for the lab experiment.');
             return;
         }
         try {
             let prompt;
-            if (key === "TITLE_OF_THE_LAB_EXPERIMENT") {
+            if (key === "Title Of The Lab Experiment") {
                 prompt = `${promptsData[key]} ${labTitle}`;
             } else {
                 prompt = promptsData[key];
@@ -79,6 +80,17 @@ const ApplicationPage = () => {
             setResponses(prev => ({ ...prev, [key]: response }));
             setFormData(prev => ({ ...prev, [key]: response }));
             setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: prompt }, { sender: 'AI', text: response }]);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleInitiate = async () => {
+        try {
+            const systemPrompt = promptsData.System;
+            const response = await generateAiResponse(userData.apiKey, systemPrompt, conversationHistory);
+            setIsInitiated(true);
+            setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: systemPrompt }, { sender: 'AI', text: response }]);
         } catch (error) {
             console.error(error);
         }
@@ -110,56 +122,67 @@ const ApplicationPage = () => {
                 </div>
             </div>
             <h1>Lab Report Generator</h1>
-            <div style={{ margin: '20px 0' }}>
-                <h2>Title of the Lab Experiment</h2>
-                <input
-                    type="text"
-                    value={labTitle}
-                    onChange={(e) => setLabTitle(e.target.value)}
-                    style={{ width: '100%', padding: '10px' }}
-                    placeholder="Enter the title of the lab experiment"
-                />
-                <div>
-                    <button onClick={() => handleGenerate("TITLE_OF_THE_LAB_EXPERIMENT")} disabled={!labTitle.trim()}>
-                        {responses["TITLE_OF_THE_LAB_EXPERIMENT"] ? 'Regenerate' : 'Generate'}
+            {!isInitiated && (
+                <div style={{ margin: '20px 0' }}>
+                    <button onClick={handleInitiate}>
+                        Initiate
                     </button>
                 </div>
-                {responses["TITLE_OF_THE_LAB_EXPERIMENT"] && (
-                    <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {responses["TITLE_OF_THE_LAB_EXPERIMENT"]}
-                        </ReactMarkdown>
-                    </div>
-                )}
-            </div>
-            {Object.keys(promptsData).filter(key => key !== "TITLE_OF_THE_LAB_EXPERIMENT").map(key => (
-                <div key={key} style={{ margin: '20px 0' }}>
-                    <h2>{key.toUpperCase()}</h2>
-                    <textarea
-                        value={formData[key]}
-                        onChange={(e) => {
-                            setFormData({ ...formData, [key]: e.target.value });
-                            setEditMode({ ...editMode, [key]: true });
-                        }}
-                        style={{ width: '100%', height: '100px' }}
-                    />
-                    <div>
-                        <button onClick={() => handleGenerate(key)}>
-                            {responses[key] ? 'Regenerate' : 'Generate'}
-                        </button>
-                        {editMode[key] && (
-                            <button onClick={() => handleSave(key)}>Save</button>
+            )}
+            {isInitiated && (
+                <>
+                    <div style={{ margin: '20px 0' }}>
+                        <h2>Title of the Lab Experiment</h2>
+                        <input
+                            type="text"
+                            value={labTitle}
+                            onChange={(e) => setLabTitle(e.target.value)}
+                            style={{ width: '100%', padding: '10px' }}
+                            placeholder="Enter the title of the lab experiment"
+                        />
+                        <div>
+                            <button onClick={() => handleGenerate("Title Of The Lab Experiment")} disabled={!labTitle.trim()}>
+                                {responses["Title Of The Lab Experiment"] ? 'Regenerate' : 'Generate'}
+                            </button>
+                        </div>
+                        {responses["Title Of The Lab Experiment"] && (
+                            <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {responses["Title Of The Lab Experiment"]}
+                                </ReactMarkdown>
+                            </div>
                         )}
                     </div>
-                    {responses[key] && (
-                        <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {responses[key]}
-                            </ReactMarkdown>
+                    {Object.keys(promptsData).filter(key => key !== "Title Of The Lab Experiment" && key !== "System").map(key => (
+                        <div key={key} style={{ margin: '20px 0' }}>
+                            <h2>{key.toUpperCase()}</h2>
+                            <textarea
+                                value={formData[key]}
+                                onChange={(e) => {
+                                    setFormData({ ...formData, [key]: e.target.value });
+                                    setEditMode({ ...editMode, [key]: true });
+                                }}
+                                style={{ width: '100%', height: '100px' }}
+                            />
+                            <div>
+                                <button onClick={() => handleGenerate(key)}>
+                                    {responses[key] ? 'Regenerate' : 'Generate'}
+                                </button>
+                                {editMode[key] && (
+                                    <button onClick={() => handleSave(key)}>Save</button>
+                                )}
+                            </div>
+                            {responses[key] && (
+                                <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {responses[key]}
+                                    </ReactMarkdown>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            ))}
+                    ))}
+                </>
+            )}
         </div>
     );
 };
