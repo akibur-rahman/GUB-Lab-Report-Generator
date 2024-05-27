@@ -12,12 +12,17 @@ const ApplicationPage = () => {
     const [formData, setFormData] = useState({});
     const [responses, setResponses] = useState({});
     const [editMode, setEditMode] = useState({});
-    const [userData, setUserData] = useState({
-        apiKey: '',
-        firstName: '',
-        lastName: '',
-        userId: '',
+    const [userData, setUserData] = useState(() => {
+        const storedUserData = localStorage.getItem('userData');
+        return storedUserData ? JSON.parse(storedUserData) : {
+            apiKey: '',
+            firstName: '',
+            lastName: '',
+            userId: '',
+        };
     });
+    const [conversationHistory, setConversationHistory] = useState([]);
+    const [labTitle, setLabTitle] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,12 +42,14 @@ const ApplicationPage = () => {
                     const userSnapshot = await get(ref(database, 'users/' + user.uid));
                     const userData = userSnapshot.val();
                     if (userData) {
-                        setUserData({
+                        const parsedUserData = {
                             userId: user.uid,
                             apiKey: userData.apiKey || '',
                             firstName: userData.firstName || '',
                             lastName: userData.lastName || '',
-                        });
+                        };
+                        setUserData(parsedUserData);
+                        localStorage.setItem('userData', JSON.stringify(parsedUserData));
                     } else {
                         console.warn('User data not found for user:', user.uid);
                     }
@@ -57,11 +64,21 @@ const ApplicationPage = () => {
     }, []);
 
     const handleGenerate = async (key) => {
+        if (key === "TITLE_OF_THE_LAB_EXPERIMENT" && !labTitle.trim()) {
+            alert('Please enter a title for the lab experiment.');
+            return;
+        }
         try {
-            const prompt = promptsData[key];
-            const response = await generateAiResponse(userData.apiKey, prompt);
+            let prompt;
+            if (key === "TITLE_OF_THE_LAB_EXPERIMENT") {
+                prompt = `${promptsData[key]} ${labTitle}`;
+            } else {
+                prompt = promptsData[key];
+            }
+            const response = await generateAiResponse(userData.apiKey, prompt, conversationHistory);
             setResponses(prev => ({ ...prev, [key]: response }));
             setFormData(prev => ({ ...prev, [key]: response }));
+            setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: prompt }, { sender: 'AI', text: response }]);
         } catch (error) {
             console.error(error);
         }
@@ -74,6 +91,7 @@ const ApplicationPage = () => {
 
     const handleLogout = async () => {
         await logout();
+        localStorage.removeItem('userData'); // Remove user data from local storage
         navigate('/login');
     };
 
@@ -92,7 +110,29 @@ const ApplicationPage = () => {
                 </div>
             </div>
             <h1>Lab Report Generator</h1>
-            {Object.keys(promptsData).map(key => (
+            <div style={{ margin: '20px 0' }}>
+                <h2>Title of the Lab Experiment</h2>
+                <input
+                    type="text"
+                    value={labTitle}
+                    onChange={(e) => setLabTitle(e.target.value)}
+                    style={{ width: '100%', padding: '10px' }}
+                    placeholder="Enter the title of the lab experiment"
+                />
+                <div>
+                    <button onClick={() => handleGenerate("TITLE_OF_THE_LAB_EXPERIMENT")} disabled={!labTitle.trim()}>
+                        {responses["TITLE_OF_THE_LAB_EXPERIMENT"] ? 'Regenerate' : 'Generate'}
+                    </button>
+                </div>
+                {responses["TITLE_OF_THE_LAB_EXPERIMENT"] && (
+                    <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {responses["TITLE_OF_THE_LAB_EXPERIMENT"]}
+                        </ReactMarkdown>
+                    </div>
+                )}
+            </div>
+            {Object.keys(promptsData).filter(key => key !== "TITLE_OF_THE_LAB_EXPERIMENT").map(key => (
                 <div key={key} style={{ margin: '20px 0' }}>
                     <h2>{key.toUpperCase()}</h2>
                     <textarea

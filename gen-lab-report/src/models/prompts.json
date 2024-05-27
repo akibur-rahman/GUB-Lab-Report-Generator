@@ -1,9 +1,9 @@
 {
-    "TITLE_OF_THE_LAB_EXPERIMENT": "Provide the title of the lab experiment. Example: 'Experiment 1: Basic Circuit Design'.",
-    "OBJECTIVES": "Describe the objectives of this lab experiment. What are you trying to achieve or learn?",
+    "TITLE_OF_THE_LAB_EXPERIMENT": "You are a undergraduate student. You are tasked with writing a lab report for a lab experiment. You must follow the instructions you will get later regarding what you should write and what format you should follow. For this prompt you need to Respond with this: THe title of this lab experiment is $lab_experiment_title$. Just repeat the title. dont create the lab report yet",
+    "OBJECTIVES": "Write the objectives of the lab experiment. These are the goals of the lab experiment. an example response is like this:The objective of this lab is to: 1. Develop a PHP script to connect to a MySQL database. 2. Create a form to load user data based on the user ID. 3. Update the user's data in the database using the form inputs.",
     "PROCEDURE": "Detail the step-by-step procedure followed during the lab experiment. Include all necessary steps and materials used.",
-    "IMPLEMENTATION": "Explain the implementation details of the lab experiment. How did you execute the procedure? Mention any equipment, software, or tools used.",
-    "OUTPUT": "Describe the output or results obtained from the lab experiment. Include any data, observations, or measurements recorded.",
+    "IMPLEMENTATION": "Explain the implementation details of the lab experiment. write the code used to solve the problem.",
+    "OUTPUT": "write the simulated output of a demo input. keep placeholder for images where necessary",
     "DISCUSSION": "Discuss the results of the lab experiment. Analyze the output, explain any anomalies, and compare with expected outcomes.",
     "SUMMARY": "Provide a summary of the lab experiment. Summarize the objectives, methods, results, and conclusions."
 }
