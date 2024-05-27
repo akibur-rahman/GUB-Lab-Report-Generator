@@ -107,6 +107,11 @@ const ApplicationPage = () => {
         navigate('/login');
     };
 
+    const generatePDF = () => {
+        const fullResponse = Object.values(responses).join('\n\n');
+        console.log(fullResponse);
+    };
+
     return (
         <div style={{ padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -181,6 +186,7 @@ const ApplicationPage = () => {
                             )}
                         </div>
                     ))}
+                    <button onClick={generatePDF}>Generate PDF</button>
                 </>
             )}
         </div>
