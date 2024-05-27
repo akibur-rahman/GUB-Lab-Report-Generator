@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { getGeminiResponse } from '../services/chatService';
-import { generatePDF } from '../services/pdfService';
+import { generateAiResponse } from '../services/chatService';
 import { logout } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
-import promptsData from '../models/prompts.json'; // Import prompts data
+import promptsData from '../models/prompts.json';
 import { get, ref } from 'firebase/database';
-import { auth, database } from '../services/firebase'; // Assuming you have Firebase service imported
+import { auth, database } from '../services/firebase';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const ApplicationPage = () => {
     const [formData, setFormData] = useState({});
     const [responses, setResponses] = useState({});
-    const [additionalInfo, setAdditionalInfo] = useState('');
+    const [editMode, setEditMode] = useState({});
     const [userData, setUserData] = useState({
         apiKey: '',
         firstName: '',
@@ -20,14 +21,15 @@ const ApplicationPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Initialize formData with prompts from promptsData
         const initialFormData = {};
+        const initialEditMode = {};
         for (const key in promptsData) {
             initialFormData[key] = '';
+            initialEditMode[key] = false;
         }
         setFormData(initialFormData);
+        setEditMode(initialEditMode);
 
-        // Fetch the user's data when the component mounts
         const fetchUserData = async () => {
             const user = auth.currentUser;
             if (user) {
@@ -52,23 +54,22 @@ const ApplicationPage = () => {
             }
         };
         fetchUserData();
-    });
+    }, []);
 
     const handleGenerate = async (key) => {
         try {
-            const response = await getGeminiResponse('USER_ID', key, additionalInfo);
+            const prompt = promptsData[key];
+            const response = await generateAiResponse(userData.apiKey, prompt);
             setResponses(prev => ({ ...prev, [key]: response }));
+            setFormData(prev => ({ ...prev, [key]: response }));
         } catch (error) {
             console.error(error);
         }
     };
 
     const handleSave = (key) => {
-        setFormData(prev => ({ ...prev, [key]: responses[key] }));
-    };
-
-    const handleGeneratePDF = () => {
-        generatePDF(formData);
+        setResponses(prev => ({ ...prev, [key]: formData[key] }));
+        setEditMode(prev => ({ ...prev, [key]: false }));
     };
 
     const handleLogout = async () => {
@@ -91,31 +92,34 @@ const ApplicationPage = () => {
                 </div>
             </div>
             <h1>Lab Report Generator</h1>
-            {Object.keys(formData).map(key => (
+            {Object.keys(promptsData).map(key => (
                 <div key={key} style={{ margin: '20px 0' }}>
                     <h2>{key.toUpperCase()}</h2>
                     <textarea
                         value={formData[key]}
-                        onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                        onChange={(e) => {
+                            setFormData({ ...formData, [key]: e.target.value });
+                            setEditMode({ ...editMode, [key]: true });
+                        }}
                         style={{ width: '100%', height: '100px' }}
                     />
                     <div>
                         <button onClick={() => handleGenerate(key)}>
                             {responses[key] ? 'Regenerate' : 'Generate'}
                         </button>
-                        {responses[key] && <button onClick={() => handleSave(key)}>Save</button>}
+                        {editMode[key] && (
+                            <button onClick={() => handleSave(key)}>Save</button>
+                        )}
                     </div>
                     {responses[key] && (
-                        <div
-                            style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px', cursor: 'pointer' }}
-                            onDoubleClick={() => setFormData({ ...formData, [key]: responses[key] })}
-                        >
-                            {responses[key]}
+                        <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {responses[key]}
+                            </ReactMarkdown>
                         </div>
                     )}
                 </div>
             ))}
-            <button onClick={handleGeneratePDF}>Generate PDF</button>
         </div>
     );
 };
