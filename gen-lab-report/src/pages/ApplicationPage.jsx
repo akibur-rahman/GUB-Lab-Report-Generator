@@ -12,12 +12,17 @@ const ApplicationPage = () => {
     const [formData, setFormData] = useState({});
     const [responses, setResponses] = useState({});
     const [editMode, setEditMode] = useState({});
-    const [userData, setUserData] = useState({
-        apiKey: '',
-        firstName: '',
-        lastName: '',
-        userId: '',
+    const [userData, setUserData] = useState(() => {
+        const storedUserData = localStorage.getItem('userData');
+        return storedUserData ? JSON.parse(storedUserData) : {
+            apiKey: '',
+            firstName: '',
+            lastName: '',
+            userId: '',
+        };
     });
+    const [titleQueue, setTitleQueue] = useState([]);
+    const [otherPromptQueue, setOtherPromptQueue] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,12 +42,14 @@ const ApplicationPage = () => {
                     const userSnapshot = await get(ref(database, 'users/' + user.uid));
                     const userData = userSnapshot.val();
                     if (userData) {
-                        setUserData({
+                        const parsedUserData = {
                             userId: user.uid,
                             apiKey: userData.apiKey || '',
                             firstName: userData.firstName || '',
                             lastName: userData.lastName || '',
-                        });
+                        };
+                        setUserData(parsedUserData);
+                        localStorage.setItem('userData', JSON.stringify(parsedUserData));
                     } else {
                         console.warn('User data not found for user:', user.uid);
                     }
@@ -62,6 +69,7 @@ const ApplicationPage = () => {
             const response = await generateAiResponse(userData.apiKey, prompt);
             setResponses(prev => ({ ...prev, [key]: response }));
             setFormData(prev => ({ ...prev, [key]: response }));
+            setEditMode(prev => ({ ...prev, [key]: true }));
         } catch (error) {
             console.error(error);
         }
@@ -74,8 +82,25 @@ const ApplicationPage = () => {
 
     const handleLogout = async () => {
         await logout();
+        localStorage.removeItem('userData'); // Remove user data from local storage
         navigate('/login');
     };
+
+    const processPrompts = async () => {
+        if (titleQueue.length > 0) {
+            const key = titleQueue[0];
+            await handleGenerate(key);
+            setTitleQueue(prev => prev.slice(1)); // Remove the processed title from the queue
+        } else if (otherPromptQueue.length > 0) {
+            const key = otherPromptQueue[0];
+            await handleGenerate(key);
+            setOtherPromptQueue(prev => prev.slice(1)); // Remove the processed prompt from the queue
+        }
+    };
+
+    useEffect(() => {
+        processPrompts();
+    }, [titleQueue, otherPromptQueue]);
 
     return (
         <div style={{ padding: '20px' }}>
@@ -104,8 +129,16 @@ const ApplicationPage = () => {
                         style={{ width: '100%', height: '100px' }}
                     />
                     <div>
-                        <button onClick={() => handleGenerate(key)}>
-                            {responses[key] ? 'Regenerate' : 'Generate'}
+                        <button onClick={() => {
+                            setTitleQueue(prev => [...prev, key]); // Add title to the title queue
+                            const relatedPrompts = promptsData[key].relatedPrompts;
+                            if (Array.isArray(relatedPrompts)) {
+                                setOtherPromptQueue(prev => [...prev, ...relatedPrompts]); // Add related prompts to the other prompt queue
+                            } else {
+                                console.error('Related prompts should be an array');
+                            }
+                        }}>
+                            Generate
                         </button>
                         {editMode[key] && (
                             <button onClick={() => handleSave(key)}>Save</button>
