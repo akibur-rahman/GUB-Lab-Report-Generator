@@ -1,7 +1,8 @@
-// src/pages/SignupPage.jsx
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/authService';
+import '../styles/login_signup_style.css';
 
 const SignupPage = () => {
     const navigate = useNavigate();
@@ -29,44 +30,49 @@ const SignupPage = () => {
     };
 
     return (
-        <div style={{ textAlign: 'center', marginTop: '50px' }}>
-            <h1>Sign Up</h1>
+        <div className="container">
+            <h1 className="heading">Sign Up</h1>
             <input
                 type="text"
                 placeholder="First Name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-            /><br />
+                className="input-field"
+            />
             <input
                 type="text"
                 placeholder="Last Name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-            /><br />
+                className="input-field"
+            />
             <input
                 type="email"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-            /><br />
+                className="input-field"
+            />
             <input
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-            /><br />
+                className="input-field"
+            />
             <input
                 type="password"
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-            /><br />
-            <button onClick={handleSignup} disabled={loading}>
+                className="input-field"
+            />
+            <button onClick={handleSignup} disabled={loading} className="button">
                 {loading ? 'Signing up...' : 'Sign Up'}
             </button>
             {error && <div>{error}</div>}
-            <div>
-                Already a member? <button onClick={() => navigate('/login')}>Login</button>
+            <div className="link">
+                Already a member? <span onClick={() => navigate('/login')}><a>Login</a></span>
             </div>
         </div>
     );

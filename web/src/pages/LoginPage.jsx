@@ -1,6 +1,8 @@
+// LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/authService'; // Import the login function
+import { login } from '../services/authService';
+import '../styles/login_signup_style.css';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -10,42 +12,46 @@ const LoginPage = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            await login(email, password, navigate); // Pass navigate to login function
+            await login(email, password, navigate);
         } catch (error) {
             console.error('Login failed:', error.message);
         }
     };
 
     const handleSignupClick = () => {
-        navigate('/signup');
+
     };
 
     return (
-        <div>
-            <h1>Login Page</h1>
+        <div className="container">
+            <h1 className="heading">Login</h1>
             <form onSubmit={handleLogin}>
-                <div>
-                    <label>Email:</label>
+                <div className="form-group">
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email"
+                        className="input-field"
                         required
                     />
                 </div>
-                <div>
-                    <label>Password:</label>
+                <div className="form-group">
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                        className="input-field"
                         required
                     />
                 </div>
-                <button type="submit">Login</button>
+                <button type="submit" className="button">Login</button>
             </form>
-            <button onClick={handleSignupClick}>Sign Up</button>
-        </div>
+            <div className="link">
+                Don't have an account? <span onClick={() => navigate('/signup')}><a>Sign Up</a></span>
+            </div>
+        </div >
     );
 };
 

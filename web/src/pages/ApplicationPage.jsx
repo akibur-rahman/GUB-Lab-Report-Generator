@@ -8,6 +8,7 @@ import { auth, database } from '../services/firebase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+
 const ApplicationPage = () => {
     const [formData, setFormData] = useState({});
     const [responses, setResponses] = useState({});
