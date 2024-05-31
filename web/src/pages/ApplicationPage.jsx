@@ -7,7 +7,6 @@ import { get, ref } from 'firebase/database';
 import { auth, database } from '../services/firebase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import '../styles/styles.css';
 
 const ApplicationPage = () => {
     const [formData, setFormData] = useState({});
