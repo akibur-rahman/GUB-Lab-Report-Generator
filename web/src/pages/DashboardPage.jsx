@@ -3,6 +3,8 @@ import { get, ref, set } from '../services/firebase';
 import { auth } from '../services/firebase';
 import { getDatabase } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
+import '../styles/app_style.css';
+
 
 const database = getDatabase();
 
@@ -33,21 +35,23 @@ const DashboardPage = () => {
     };
 
     return (
-        <div style={{ textAlign: 'center', marginTop: '50px' }}>
-            <h1>Dashboard</h1>
-            {loading ? (
-                <p>Loading...</p>
-            ) : (
-                <>
-                    <input
-                        type="text"
-                        placeholder="Gemini API Key"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                    /><br />
-                    <button onClick={handleSave}>Save API Key</button>
-                </>
-            )}
+        <div className="container">
+            <div className="form-container">
+                <h1>Dashboard</h1>
+                {loading ? (
+                    <p>Loading...</p>
+                ) : (
+                    <>
+                        <input
+                            type="text"
+                            placeholder="Gemini API Key"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                        /><br />
+                        <button onClick={handleSave}>Save API Key</button>
+                    </>
+                )}
+            </div>
         </div>
     );
 };

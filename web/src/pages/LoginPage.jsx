@@ -1,8 +1,7 @@
-// LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
-import '../styles/login_signup_style.css';
+import '../styles/styles.css';
 
 const LoginPage = () => {
     const navigate = useNavigate();

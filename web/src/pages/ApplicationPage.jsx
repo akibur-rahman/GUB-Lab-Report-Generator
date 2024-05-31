@@ -7,7 +7,7 @@ import { get, ref } from 'firebase/database';
 import { auth, database } from '../services/firebase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
+import '../styles/styles.css';
 
 const ApplicationPage = () => {
     const [formData, setFormData] = useState({});
@@ -104,7 +104,7 @@ const ApplicationPage = () => {
 
     const handleLogout = async () => {
         await logout();
-        localStorage.removeItem('userData'); // Remove user data from local storage
+        localStorage.removeItem('userData');
         navigate('/login');
     };
 
@@ -114,8 +114,8 @@ const ApplicationPage = () => {
     };
 
     return (
-        <div style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div className="container">
+            <div className="header">
                 <div>
                     <p>Profile Banner</p>
                     <p>User ID: {userData.userId || 'Loading...'}</p>
@@ -123,73 +123,63 @@ const ApplicationPage = () => {
                 </div>
                 <div>
                     <p style={{ textAlign: 'center' }}>API Key: {userData.apiKey || 'Loading...'}</p>
-                    <button onClick={() => navigate('/dashboard')}>Dashboard</button>
-                    <button onClick={handleLogout}>Logout</button>
+                    <button className="md-button" onClick={() => navigate('/dashboard')}>Dashboard</button>
+                    <button className="md-button" onClick={handleLogout}>Logout</button>
                 </div>
             </div>
-            <h1>Lab Report Generator</h1>
+            <h1 className="main-title">Lab Report Generator</h1>
             {!isInitiated && (
                 <div style={{ margin: '20px 0' }}>
-                    <button onClick={handleInitiate}>
-                        Initiate
-                    </button>
+                    <button className="md-button" onClick={handleInitiate}>Initiate Conversation</button>
                 </div>
             )}
-            {isInitiated && (
-                <>
-                    <div style={{ margin: '20px 0' }}>
-                        <h2>Title of the Lab Experiment</h2>
-                        <input
-                            type="text"
-                            value={labTitle}
-                            onChange={(e) => setLabTitle(e.target.value)}
-                            style={{ width: '100%', padding: '10px' }}
-                            placeholder="Enter the title of the lab experiment"
+            <div className="section">
+                <h2>Title Of The Lab Experiment</h2>
+                <input
+                    type="text"
+                    value={labTitle}
+                    onChange={(e) => setLabTitle(e.target.value)}
+                />
+                <button className="md-button" onClick={() => handleGenerate("Title Of The Lab Experiment")}>Generate</button>
+                {responses["Title Of The Lab Experiment"] && (
+                    <>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {responses["Title Of The Lab Experiment"]}
+                        </ReactMarkdown>
+                        <textarea
+                            value={formData["Title Of The Lab Experiment"]}
+                            onChange={(e) => setFormData({ ...formData, "Title Of The Lab Experiment": e.target.value })}
+                            className="section textarea"
+                            style={{ whiteSpace: "pre-wrap" }}
                         />
-                        <div>
-                            <button onClick={() => handleGenerate("Title Of The Lab Experiment")} disabled={!labTitle.trim()}>
-                                {responses["Title Of The Lab Experiment"] ? 'Regenerate' : 'Generate'}
-                            </button>
-                        </div>
-                        {responses["Title Of The Lab Experiment"] && (
-                            <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
+                        <button className="md-button" onClick={() => handleSave("Title Of The Lab Experiment")}>Save</button>
+                    </>
+                )}
+            </div>
+            {Object.keys(promptsData).map(key => {
+                if (key === "Title Of The Lab Experiment" || key === "System") return null;
+                return (
+                    <div className="section" key={key}>
+                        <h2>{key}</h2>
+                        <button className="md-button" onClick={() => handleGenerate(key)}>Generate</button>
+                        {responses[key] && (
+                            <>
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {responses["Title Of The Lab Experiment"]}
+                                    {responses[key]}
                                 </ReactMarkdown>
-                            </div>
+                                <textarea
+                                    value={formData[key]}
+                                    onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                                    className="section textarea"
+                                    style={{ whiteSpace: "pre-wrap" }}
+                                />
+                                <button className="md-button" onClick={() => handleSave(key)}>Save</button>
+                            </>
                         )}
                     </div>
-                    {Object.keys(promptsData).filter(key => key !== "Title Of The Lab Experiment" && key !== "System").map(key => (
-                        <div key={key} style={{ margin: '20px 0' }}>
-                            <h2>{key.toUpperCase()}</h2>
-                            <textarea
-                                value={formData[key]}
-                                onChange={(e) => {
-                                    setFormData({ ...formData, [key]: e.target.value });
-                                    setEditMode({ ...editMode, [key]: true });
-                                }}
-                                style={{ width: '100%', height: '100px' }}
-                            />
-                            <div>
-                                <button onClick={() => handleGenerate(key)}>
-                                    {responses[key] ? 'Regenerate' : 'Generate'}
-                                </button>
-                                {editMode[key] && (
-                                    <button onClick={() => handleSave(key)}>Save</button>
-                                )}
-                            </div>
-                            {responses[key] && (
-                                <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {responses[key]}
-                                    </ReactMarkdown>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                    <button onClick={generatePDF}>Generate PDF</button>
-                </>
-            )}
+                );
+            })}
+            <button className="generate-pdf" onClick={generatePDF}>Generate PDF</button>
         </div>
     );
 };
