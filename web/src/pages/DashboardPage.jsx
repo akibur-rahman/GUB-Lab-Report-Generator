@@ -3,7 +3,6 @@ import { get, ref, set } from '../services/firebase';
 import { auth } from '../services/firebase';
 import { getDatabase } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
-import '../styles/app_style.css';
 
 
 const database = getDatabase();

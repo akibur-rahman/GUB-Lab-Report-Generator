@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
-import '../styles/styles.css';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -17,41 +16,85 @@ const LoginPage = () => {
         }
     };
 
-    const handleSignupClick = () => {
-
-    };
-
     return (
-        <div className="container">
-            <h1 className="heading">Login</h1>
-            <form onSubmit={handleLogin}>
-                <div className="form-group">
+        <div style={styles.container}>
+            <h1 style={styles.heading}>Login</h1>
+            <form onSubmit={handleLogin} style={styles.form}>
+                <div style={styles.formGroup}>
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Email"
-                        className="input-field"
+                        style={styles.inputField}
                         required
                     />
                 </div>
-                <div className="form-group">
+                <div style={styles.formGroup}>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
-                        className="input-field"
+                        style={styles.inputField}
                         required
                     />
                 </div>
-                <button type="submit" className="button">Login</button>
+                <button type="submit" style={styles.button}>Login</button>
             </form>
-            <div className="link">
-                Don't have an account? <span onClick={() => navigate('/signup')}><a>Sign Up</a></span>
+            <div style={styles.link}>
+                Don't have an account? <span style={styles.signupText} onClick={() => navigate('/signup')}><a>Sign Up</a></span>
             </div>
         </div >
     );
+};
+
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#f5f5f5',
+    },
+    heading: {
+        fontSize: '2rem',
+        marginBottom: '20px',
+    },
+    form: {
+        width: '300px',
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    formGroup: {
+        marginBottom: '15px',
+    },
+    inputField: {
+        width: '100%',
+        padding: '10px',
+        fontSize: '1rem',
+        borderRadius: '5px',
+        border: '1px solid #ccc',
+    },
+    button: {
+        width: '320px',
+        padding: '10px',
+        fontSize: '1rem',
+        borderRadius: '5px',
+        border: 'none',
+        backgroundColor: '#007BFF',
+        color: 'white',
+        cursor: 'pointer',
+    },
+    link: {
+        marginTop: '20px',
+        fontSize: '1rem',
+    },
+    signupText: {
+        color: '#007BFF',
+        cursor: 'pointer',
+    },
 };
 
 export default LoginPage;
