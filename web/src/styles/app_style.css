@@ -1,0 +1,104 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #E0FBE2;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.header p {
+    margin: 0;
+}
+
+.md-button {
+    background-color: #39863c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+    margin: 5px;
+}
+
+.md-button:hover {
+    background-color: #388e3c;
+}
+
+.main-title {
+    text-align: center;
+    color: #388e3c;
+    margin-bottom: 20px;
+}
+
+.section {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.section h2 {
+    color: #388e3c;
+    margin-bottom: 10px;
+}
+
+.section input[type="text"],
+.section textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.section input[type="text"]:focus,
+.section textarea:focus {
+    border-color: #388e3c;
+    box-shadow: 0 0 5px rgba(56, 142, 60, 0.5);
+    outline: none;
+}
+
+.section textarea {
+    min-height: 200px;
+    max-height: 500px;
+    resize: vertical;
+    overflow: auto;
+}
+
+.generate-pdf {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 20px auto;
+}
+
+.generate-pdf:hover {
+    background-color: #388e3c;
+}
