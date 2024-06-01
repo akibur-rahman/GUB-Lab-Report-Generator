@@ -8,7 +8,6 @@ import { auth, database } from '../services/firebase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-// Loading screen component
 const LoadingScreen = () => {
     return (
         <div style={styles.overlay}>
@@ -16,8 +15,6 @@ const LoadingScreen = () => {
         </div>
     );
 };
-
-
 
 // ApplicationPage component
 const ApplicationPage = () => {
@@ -300,7 +297,6 @@ const styles = {
         justifyContent: 'center',
         marginTop: '10px',
     },
-    // Loading screen styles
     overlay: {
         position: 'fixed',
         top: 0,
@@ -312,13 +308,14 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 9999, // Ensures loading screen appears above other content
+        backdropFilter: 'blur(10px)', // Optional: adds blur effect
     },
     spinner: {
-        border: '6px solid rgba(255, 255, 255, 0.3)', // Semi-transparent white border
-        borderTop: '6px solid #fff', // White border for spinner
-        borderRadius: '50%',
         width: '50px',
         height: '50px',
+        border: '5px solid rgba(255, 255, 255, 0.3)', // Semi-transparent white border
+        borderTop: '5px solid #007aff', // Cupertino blue border for spinner
+        borderRadius: '50%',
         animation: 'spin 1s linear infinite', // Spin animation
     },
     '@keyframes spin': {
