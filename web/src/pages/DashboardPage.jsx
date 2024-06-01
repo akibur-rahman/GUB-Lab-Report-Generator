@@ -4,7 +4,6 @@ import { auth } from '../services/firebase';
 import { getDatabase } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
 
-
 const database = getDatabase();
 
 const DashboardPage = () => {
@@ -34,23 +33,21 @@ const DashboardPage = () => {
     };
 
     return (
-        <div className="container">
-            <div className="form-container">
-                <h1>Dashboard</h1>
-                {loading ? (
-                    <p>Loading...</p>
-                ) : (
-                    <>
-                        <input
-                            type="text"
-                            placeholder="Gemini API Key"
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                        /><br />
-                        <button onClick={handleSave}>Save API Key</button>
-                    </>
-                )}
-            </div>
+        <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <h1>Dashboard</h1>
+            {loading ? (
+                <p>Loading...</p>
+            ) : (
+                <>
+                    <input
+                        type="text"
+                        placeholder="Gemini API Key"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                    /><br />
+                    <button onClick={handleSave}>Save API Key</button>
+                </>
+            )}
         </div>
     );
 };

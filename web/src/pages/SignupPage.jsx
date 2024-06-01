@@ -70,7 +70,7 @@ const SignupPage = () => {
             </button>
             {error && <div style={styles.error}>{error}</div>}
             <div style={styles.link}>
-                Already a member? <span style={styles.loginText} onClick={() => navigate('/login')}><a>Login</a></span>
+                Already a member? <button style={styles.loginText} onClick={() => navigate('/login')}>Login</button>
             </div>
         </div>
     );
@@ -118,6 +118,11 @@ const styles = {
     loginText: {
         color: '#007BFF',
         cursor: 'pointer',
+        background: 'none',
+        border: 'none',
+        padding: '0',
+        fontSize: '1rem',
     },
 };
+
 export default SignupPage;

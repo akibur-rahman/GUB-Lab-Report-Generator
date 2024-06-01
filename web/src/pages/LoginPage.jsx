@@ -43,9 +43,9 @@ const LoginPage = () => {
                 <button type="submit" style={styles.button}>Login</button>
             </form>
             <div style={styles.link}>
-                Don't have an account? <span style={styles.signupText} onClick={() => navigate('/signup')}><a>Sign Up</a></span>
+                Don't have an account? <button style={styles.signupText} onClick={() => navigate('/signup')}>Sign Up</button>
             </div>
-        </div >
+        </div>
     );
 };
 
@@ -71,11 +71,12 @@ const styles = {
         marginBottom: '15px',
     },
     inputField: {
-        width: '100%',
+        width: '300px',
         padding: '10px',
         fontSize: '1rem',
         borderRadius: '5px',
         border: '1px solid #ccc',
+        marginBottom: '15px',
     },
     button: {
         width: '320px',
@@ -94,6 +95,10 @@ const styles = {
     signupText: {
         color: '#007BFF',
         cursor: 'pointer',
+        background: 'none',
+        border: 'none',
+        padding: '0',
+        fontSize: '1rem',
     },
 };
 
