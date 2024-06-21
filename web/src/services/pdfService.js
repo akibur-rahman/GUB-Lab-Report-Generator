@@ -5,27 +5,26 @@ import { marked } from "marked";
 export const generatePDF = (responses) => {
     const doc = new jsPDF();
 
-    doc.setFont("times");
-    doc.setFontSize(16);
-    doc.text("Lab Report", 105, 15, null, null, "center");
+    doc.setFont("Times", "normal");
+    doc.setFontSize(14);
 
     let yPos = 30;
 
     for (const [key, value] of Object.entries(responses)) {
         doc.setFontSize(14);
-        doc.setFont("times", "bold");
+        doc.setFont("Times", "bold");
         doc.text(key.toUpperCase(), 20, yPos);
         yPos += 10;
 
         const tokens = marked.lexer(value.response);
 
         doc.setFontSize(12);
-        doc.setFont("times", "normal");
+        doc.setFont("Times", "normal");
 
         for (const token of tokens) {
             switch (token.type) {
                 case 'paragraph':
-                    yPos = addParagraph(doc, token.text, yPos);
+                    yPos = addParagraph(doc, token.text.replace(/\*\*/g, ''), yPos);
                     break;
                 case 'heading':
                     yPos = addHeading(doc, token.text, token.depth, yPos);
@@ -54,82 +53,77 @@ export const generatePDF = (responses) => {
 };
 
 function addParagraph(doc, text, y) {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    let x = 20;
-
-    parts.forEach(part => {
-        let lines;
-        if (part.startsWith('**') && part.endsWith('**')) {
-            doc.setFont("times", "bold");
-            const boldText = part.slice(2, -2);
-            lines = doc.splitTextToSize(boldText, 170 - (x - 20));
-        } else {
-            doc.setFont("times", "normal");
-            lines = doc.splitTextToSize(part, 170 - (x - 20));
+    doc.setFont("Times", "normal");
+    const lines = doc.splitTextToSize(text, 170);
+    lines.forEach(line => {
+        if (y > 270) {
+            doc.addPage();
+            y = 20;
         }
-
-        lines.forEach((line, index) => {
-            if (x + doc.getTextWidth(line) > 190) {
-                const words = line.split(' ');
-                let newLine = '';
-                words.forEach(word => {
-                    if (x + doc.getTextWidth(newLine + word + ' ') <= 190) {
-                        newLine += word + ' ';
-                    } else {
-                        doc.text(newLine.trim(), x, y);
-                        newLine = word + ' ';
-                        x = 20;
-                        y += 7;
-                    }
-                });
-                line = newLine.trim();
-            }
-            doc.text(line, x, y);
-            if (index < lines.length - 1) {
-                x = 20;
-                y += 7;
-            } else {
-                x += doc.getTextWidth(line);
-            }
-        });
-
-        doc.setFont("times", "normal");
+        doc.text(line, 20, y);
+        y += 7;
     });
-
-    return y + 7;
+    return y + 3;
 }
 
 function addHeading(doc, text, depth, y) {
     const fontSize = 16 - depth * 2;
-    doc.setFont("times", "bold");
+    doc.setFont("Times", "bold");
     doc.setFontSize(fontSize);
     doc.text(text, 20, y);
     doc.setFontSize(12);
-    doc.setFont("times", "normal");
+    doc.setFont("Times", "normal");
     return y + 10;
 }
 
 function addCodeBlock(doc, code, y) {
-    doc.setFont("courier", "normal");
-    doc.setFillColor(240, 240, 240);
+    doc.setFont("Courier", "normal");
+    doc.setFontSize(9);
+    doc.setFillColor(255, 255, 255);
+    const lines = doc.splitTextToSize(code, 170);
+    let currentY = y;
 
-    const lines = doc.splitTextToSize(code, 160);
-    const blockHeight = lines.length * 7 + 10;
+    while (lines.length > 0) {
+        // Calculate how many lines fit on the current page
+        const linesOnPage = Math.min(
+            lines.length,
+            Math.floor((270 - currentY) / 5)
+        );
 
-    doc.rect(15, y - 5, 180, blockHeight, 'F');
-    doc.setTextColor(0, 100, 0);
-    doc.text(lines, 20, y);
+        // Draw background for this page's portion of the code block
+        const blockHeight = linesOnPage * 5 + 10;
+        doc.setFillColor(255, 255, 255);
+        doc.rect(15, currentY - 5, 180, blockHeight, 'F');
+
+        // Draw text for this page's portion
+        doc.setTextColor(0, 0, 0);
+        for (let i = 0; i < linesOnPage; i++) {
+            doc.text(lines[i], 20, currentY);
+            currentY += 5;
+        }
+
+        // Remove the lines we've drawn
+        lines.splice(0, linesOnPage);
+
+        // If there are more lines, add a new page
+        if (lines.length > 0) {
+            doc.addPage();
+            currentY = 20;
+        }
+    }
 
     doc.setTextColor(0, 0, 0);
-    doc.setFont("times", "normal");
+    doc.setFont("Times", "normal");
+    doc.setFontSize(12);
 
-    return y + blockHeight + 5;
+    return currentY + 5;
 }
 
 function addList(doc, items, y) {
+    doc.setFont("Times", "normal");
     items.forEach((item) => {
         doc.text("•", 20, y);
-        const lines = doc.splitTextToSize(item.text, 165);
+        const lines = doc.splitTextToSize(item.text.replace(/\*\*/g, ''), 165);
         doc.text(lines, 25, y);
         y += lines.length * 7;
     });
@@ -145,7 +139,7 @@ function addTable(doc, token, y) {
         head: [headers],
         body: rows,
         theme: 'grid',
-        styles: { fontSize: 10, cellPadding: 2, font: "times" },
+        styles: { fontSize: 10, cellPadding: 2, font: "Times" },
         headStyles: { fillColor: [200, 200, 200], textColor: 0 },
         margin: { left: 20, right: 20 },
     });
