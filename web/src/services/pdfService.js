@@ -24,7 +24,7 @@ export const generatePDF = (responses) => {
         for (const token of tokens) {
             switch (token.type) {
                 case 'paragraph':
-                    yPos = addParagraph(doc, token.text.replace(/\*\*/g, ''), yPos);
+                    yPos = addParagraph(doc, token.text, yPos);
                     break;
                 case 'heading':
                     yPos = addHeading(doc, token.text, token.depth, yPos);
@@ -53,17 +53,138 @@ export const generatePDF = (responses) => {
 };
 
 function addParagraph(doc, text, y) {
+    const parts = text.split(/(\*\*.*?\*\*)/);
+    let currentX = 20;
+    let lineHeight = 7;
+    let maxWidth = 170;
+
     doc.setFont("Times", "normal");
-    const lines = doc.splitTextToSize(text, 170);
-    lines.forEach(line => {
-        if (y > 270) {
-            doc.addPage();
-            y = 20;
+
+    parts.forEach((part, index) => {
+        let isBold = false;
+        if (part.startsWith('**') && part.endsWith('**')) {
+            doc.setFont("Times", "bold");
+            part = part.slice(2, -2); // Remove ** from start and end
+            isBold = true;
+        } else {
+            doc.setFont("Times", "normal");
         }
-        doc.text(line, 20, y);
-        y += 7;
+
+        const words = part.split(' ');
+        let line = '';
+
+        words.forEach((word, wordIndex) => {
+            const testLine = line + (line ? ' ' : '') + word;
+            const testWidth = doc.getStringUnitWidth(testLine) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+
+            if (testWidth > maxWidth) {
+                if (line) {
+                    doc.text(line, currentX, y);
+                    y += lineHeight;
+                    currentX = 20;
+                    line = word;
+                } else {
+                    // If a single word is too long, force-break it
+                    doc.text(word, currentX, y);
+                    y += lineHeight;
+                    currentX = 20;
+                    line = '';
+                }
+            } else {
+                line = testLine;
+            }
+
+            // Check if we need to move to a new page
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+                currentX = 20;
+            }
+        });
+
+        // Print any remaining text
+        if (line) {
+            doc.text(line, currentX, y);
+            y += lineHeight;
+            currentX = 20;
+        }
+
+        if (isBold) {
+            doc.setFont("Times", "normal");
+        }
     });
-    return y + 3;
+
+    return y;
+}
+
+function addList(doc, items, y) {
+    const lineHeight = 7;
+    const maxWidth = 165;
+
+    items.forEach((item) => {
+        let currentY = y;
+        doc.text("•", 20, currentY);
+        const parts = item.text.split(/(\*\*.*?\*\*)/);
+        let currentX = 25;
+
+        parts.forEach((part, index) => {
+            let isBold = false;
+            if (part.startsWith('**') && part.endsWith('**')) {
+                doc.setFont("Times", "bold");
+                part = part.slice(2, -2); // Remove ** from start and end
+                isBold = true;
+            } else {
+                doc.setFont("Times", "normal");
+            }
+
+            const words = part.split(' ');
+            let line = '';
+
+            words.forEach((word, wordIndex) => {
+                const testLine = line + (line ? ' ' : '') + word;
+                const testWidth = doc.getStringUnitWidth(testLine) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+
+                if (testWidth > maxWidth) {
+                    if (line) {
+                        doc.text(line, currentX, currentY);
+                        currentY += lineHeight;
+                        currentX = 25;
+                        line = word;
+                    } else {
+                        // If a single word is too long, force-break it
+                        doc.text(word, currentX, currentY);
+                        currentY += lineHeight;
+                        currentX = 25;
+                        line = '';
+                    }
+                } else {
+                    line = testLine;
+                }
+
+                // Check if we need to move to a new page
+                if (currentY > 270) {
+                    doc.addPage();
+                    currentY = 20;
+                    currentX = 25;
+                }
+            });
+
+            // Print any remaining text
+            if (line) {
+                doc.text(line, currentX, currentY);
+                currentY += lineHeight;
+                currentX = 25;
+            }
+
+            if (isBold) {
+                doc.setFont("Times", "normal");
+            }
+        });
+
+        y = currentY;
+    });
+
+    return y;
 }
 
 function addHeading(doc, text, depth, y) {
@@ -119,16 +240,7 @@ function addCodeBlock(doc, code, y) {
     return currentY + 5;
 }
 
-function addList(doc, items, y) {
-    doc.setFont("Times", "normal");
-    items.forEach((item) => {
-        doc.text("•", 20, y);
-        const lines = doc.splitTextToSize(item.text.replace(/\*\*/g, ''), 165);
-        doc.text(lines, 25, y);
-        y += lines.length * 7;
-    });
-    return y;
-}
+
 
 function addTable(doc, token, y) {
     const headers = token.header.map(cell => cell.text);
