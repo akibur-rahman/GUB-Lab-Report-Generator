@@ -123,12 +123,15 @@ const ApplicationPage = () => {
 
     const handleInitiate = async () => {
         try {
+            setLoading(true);
             const systemPrompt = promptsData.System;
             const response = await generateAiResponse(userData.apiKey, systemPrompt, conversationHistory);
             setIsInitiated(true);
             setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: systemPrompt }, { sender: 'AI', text: response }]);
         } catch (error) {
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
