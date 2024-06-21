@@ -7,6 +7,7 @@ import { get, ref } from 'firebase/database';
 import { auth, database } from '../services/firebase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { generatePDF as generatePDFService } from '../services/pdfService';
 
 const LoadingScreen = () => {
     return (
@@ -33,6 +34,8 @@ const ApplicationPage = () => {
     const [conversationHistory, setConversationHistory] = useState([]);
     const [isInitiated, setIsInitiated] = useState(false);
     const [loading, setLoading] = useState(false); // Loading state
+    const [additionalContext, setAdditionalContext] = useState('');
+    const [showAdditionalContext, setShowAdditionalContext] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -84,10 +87,14 @@ const ApplicationPage = () => {
                     return;
                 }
                 const prompt = `${promptsData[key]} ${formData[key]}`;
-                const response = await generateAiResponse(userData.apiKey, prompt, conversationHistory);
+                const additionalContextFormatting = ".Additional context: "
+                const finalPrompt = showAdditionalContext && additionalContext.trim()
+                    ? `${prompt} ${additionalContextFormatting} ${additionalContext}`
+                    : prompt;
+                const response = await generateAiResponse(userData.apiKey, finalPrompt, conversationHistory);
                 setResponses(prev => ({ ...prev, [key]: response }));
                 setFormData(prev => ({ ...prev, [key]: response }));
-                setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: prompt }, { sender: 'AI', text: response }]);
+                setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: finalPrompt }, { sender: 'AI', text: response }]);
             } else {
                 if (!responses["Title Of The Lab Experiment"]) {
                     alert('Please generate the title first.');
@@ -130,9 +137,19 @@ const ApplicationPage = () => {
     };
 
     const generatePDF = () => {
-        const fullResponse = Object.values(responses).join('\n\n');
-        console.log(fullResponse);
+        const formattedResponses = Object.keys(promptsData).reduce((acc, key) => {
+            if (responses[key]) {
+                acc[key] = {
+                    response: responses[key],
+                    originalFormatting: formData[key],
+                };
+            }
+            return acc;
+        }, {});
+
+        generatePDFService(formattedResponses);
     };
+
 
     const handleTextareaChange = (e, key) => {
         setFormData({ ...formData, [key]: e.target.value });
@@ -184,6 +201,23 @@ const ApplicationPage = () => {
                             style={styles.inputField}
                             placeholder="Enter the title of the lab experiment"
                         />
+                        <div style={styles.checkboxContainer}>
+                            <input
+                                type="checkbox"
+                                id="additionalContext"
+                                checked={showAdditionalContext}
+                                onChange={() => setShowAdditionalContext(!showAdditionalContext)}
+                            />
+                            <label htmlFor="additionalContext">Add additional context</label>
+                        </div>
+                        {showAdditionalContext && (
+                            <textarea
+                                value={additionalContext}
+                                onChange={(e) => setAdditionalContext(e.target.value)}
+                                style={styles.inputField}
+                                placeholder="Enter additional context"
+                            />
+                        )}
                         <div style={styles.centeredButtonContainer}>
                             <button style={styles.button} onClick={() => handleGenerate("Title Of The Lab Experiment")} disabled={!formData["Title Of The Lab Experiment"].trim()}>
                                 {responses["Title Of The Lab Experiment"] ? 'Regenerate' : 'Generate'}
@@ -326,8 +360,11 @@ const styles = {
             transform: 'rotate(360deg)',
         },
     },
+    checkboxContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: '15px',
+    },
 };
 
-
 export default ApplicationPage;
-

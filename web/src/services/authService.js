@@ -1,4 +1,6 @@
-import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, set, ref, database } from './firebase';
+// authService.js
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from './firebase';
+import { set, ref, database } from './firebase';
 
 export const signup = async (firstName, lastName, email, password) => {
     try {

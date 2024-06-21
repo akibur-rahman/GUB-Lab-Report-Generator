@@ -1,3 +1,4 @@
+// firebase.js
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getDatabase, ref, set, get } from 'firebase/database';
