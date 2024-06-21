@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Container, Typography, Paper, TextField, Button, Box, AppBar, Toolbar, Avatar, Checkbox, FormControlLabel } from '@mui/material';
 import { generateAiResponse } from '../services/chatService';
 import { logout } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
@@ -8,11 +9,29 @@ import { auth, database } from '../services/firebase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { generatePDF as generatePDFService } from '../services/pdfService';
+import styled from '@emotion/styled';
+import { keyframes } from '@emotion/react';
+
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
+
+const SpinnerDiv = styled.div`
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 40px;
+  height: 40px;
+  animation: ${spin} 1s linear infinite;
+`;
+
 
 const LoadingScreen = () => {
     return (
         <div style={styles.overlay}>
-            <div style={styles.spinner}></div>
+            <SpinnerDiv />
         </div>
     );
 };
@@ -33,20 +52,27 @@ const ApplicationPage = () => {
     });
     const [conversationHistory, setConversationHistory] = useState([]);
     const [isInitiated, setIsInitiated] = useState(false);
-    const [loading, setLoading] = useState(false); // Loading state
-    const [additionalContext, setAdditionalContext] = useState('');
-    const [showAdditionalContext, setShowAdditionalContext] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [additionalContexts, setAdditionalContexts] = useState({});
+    const [showAdditionalContexts, setShowAdditionalContexts] = useState({});
+    const textAreaRefs = useRef({});
     const navigate = useNavigate();
 
     useEffect(() => {
         const initialFormData = {};
         const initialEditMode = {};
+        const initialAdditionalContexts = {};
+        const initialShowAdditionalContexts = {};
         for (const key in promptsData) {
             initialFormData[key] = '';
             initialEditMode[key] = false;
+            initialAdditionalContexts[key] = '';
+            initialShowAdditionalContexts[key] = false;
         }
         setFormData(initialFormData);
         setEditMode(initialEditMode);
+        setAdditionalContexts(initialAdditionalContexts);
+        setShowAdditionalContexts(initialShowAdditionalContexts);
 
         const fetchUserData = async () => {
             const user = auth.currentUser;
@@ -76,41 +102,22 @@ const ApplicationPage = () => {
         fetchUserData();
     }, []);
 
-    // Handle generate function
     const handleGenerate = async (key) => {
         try {
-            setLoading(true); // Set loading to true when fetching response
-            if (key === "Title Of The Lab Experiment") {
-                if (!formData[key].trim()) {
-                    alert('Please enter a title for the lab experiment.');
-                    setLoading(false); // Set loading to false if validation fails
-                    return;
-                }
-                const prompt = `${promptsData[key]} ${formData[key]}`;
-                const additionalContextFormatting = ".Additional context: "
-                const finalPrompt = showAdditionalContext && additionalContext.trim()
-                    ? `${prompt} ${additionalContextFormatting} ${additionalContext}`
-                    : prompt;
-                const response = await generateAiResponse(userData.apiKey, finalPrompt, conversationHistory);
-                setResponses(prev => ({ ...prev, [key]: response }));
-                setFormData(prev => ({ ...prev, [key]: response }));
-                setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: finalPrompt }, { sender: 'AI', text: response }]);
-            } else {
-                if (!responses["Title Of The Lab Experiment"]) {
-                    alert('Please generate the title first.');
-                    setLoading(false); // Set loading to false if title is not generated
-                    return;
-                }
-                const prompt = promptsData[key];
-                const response = await generateAiResponse(userData.apiKey, prompt, conversationHistory);
-                setResponses(prev => ({ ...prev, [key]: response }));
-                setFormData(prev => ({ ...prev, [key]: response }));
-                setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: prompt }, { sender: 'AI', text: response }]);
-            }
+            setLoading(true);
+            const prompt = `${promptsData[key]} ${formData[key]}`;
+            const additionalContextFormatting = ". Additional context: ";
+            const finalPrompt = showAdditionalContexts[key] && additionalContexts[key].trim()
+                ? `${prompt}${additionalContextFormatting}${additionalContexts[key]}`
+                : prompt;
+            const response = await generateAiResponse(userData.apiKey, finalPrompt, conversationHistory);
+            setResponses(prev => ({ ...prev, [key]: response }));
+            setFormData(prev => ({ ...prev, [key]: response }));
+            setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: finalPrompt }, { sender: 'AI', text: response }]);
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false); // Set loading to false after response is fetched or if there's an error
+            setLoading(false);
         }
     };
 
@@ -150,220 +157,179 @@ const ApplicationPage = () => {
         generatePDFService(formattedResponses);
     };
 
-
     const handleTextareaChange = (e, key) => {
-        setFormData({ ...formData, [key]: e.target.value });
+        const value = e.target.value;
+        setFormData({ ...formData, [key]: value });
         setEditMode({ ...editMode, [key]: true });
-        adjustTextareaHeight(e.target);
+
+        adjustTextareaHeight(key);
     };
 
-    const adjustTextareaHeight = (textarea) => {
-        textarea.style.height = 'auto';
-        textarea.style.height = `${textarea.scrollHeight}px`;
+    const adjustTextareaHeight = (key) => {
+        const textarea = textAreaRefs.current[key];
+        if (textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = `${textarea.scrollHeight}px`;
+        }
     };
-
-    useEffect(() => {
-        const textareas = document.querySelectorAll('textarea');
-        textareas.forEach(adjustTextareaHeight);
-    }, [formData]);
 
     return (
-        <div style={styles.container}>
-            {/* Conditionally render LoadingScreen */}
+        <Box>
             {loading && <LoadingScreen />}
-            <div style={styles.header}>
-                <div>
-                    <p>Profile Banner</p>
-                    <p>User ID: {userData.userId || 'Loading...'}</p>
-                    <p>Name: {userData.firstName} {userData.lastName}</p>
-                </div>
-                <div style={styles.headerRight}>
-                    <p style={{ textAlign: 'center' }}>API Key: {userData.apiKey || 'Loading...'}</p>
-                    <button style={styles.button} onClick={() => navigate('/dashboard')}>Dashboard</button>
-                    <button style={styles.button} onClick={handleLogout}>Logout</button>
-                </div>
-            </div>
-            <h1 style={styles.heading}>Lab Report Generator</h1>
-            {!isInitiated && (
-                <div style={styles.centeredButtonContainer}>
-                    <button style={styles.button} onClick={handleInitiate}>
-                        Initiate
-                    </button>
-                </div>
-            )}
-            {isInitiated && (
-                <>
-                    <div style={styles.section}>
-                        <h2>Title of the Lab Experiment</h2>
-                        <textarea
-                            value={formData["Title Of The Lab Experiment"]}
-                            onChange={(e) => handleTextareaChange(e, "Title Of The Lab Experiment")}
-                            style={styles.inputField}
-                            placeholder="Enter the title of the lab experiment"
-                        />
-                        <div style={styles.checkboxContainer}>
-                            <input
-                                type="checkbox"
-                                id="additionalContext"
-                                checked={showAdditionalContext}
-                                onChange={() => setShowAdditionalContext(!showAdditionalContext)}
-                            />
-                            <label htmlFor="additionalContext">Add additional context</label>
-                        </div>
-                        {showAdditionalContext && (
-                            <textarea
-                                value={additionalContext}
-                                onChange={(e) => setAdditionalContext(e.target.value)}
-                                style={styles.inputField}
-                                placeholder="Enter additional context"
-                            />
-                        )}
-                        <div style={styles.centeredButtonContainer}>
-                            <button style={styles.button} onClick={() => handleGenerate("Title Of The Lab Experiment")} disabled={!formData["Title Of The Lab Experiment"].trim()}>
-                                {responses["Title Of The Lab Experiment"] ? 'Regenerate' : 'Generate'}
-                            </button>
-                            {editMode["Title Of The Lab Experiment"] && (
-                                <button style={styles.button} onClick={() => handleSave("Title Of The Lab Experiment")}>Save</button>
-                            )}
-                        </div>
-                        {responses["Title Of The Lab Experiment"] && (
-                            <div style={styles.responseContainer}>
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {responses["Title Of The Lab Experiment"]}
-                                </ReactMarkdown>
-                            </div>
-                        )}
-                    </div>
-                    {Object.keys(promptsData).filter(key => key !== "Title Of The Lab Experiment" && key !== "System").map(key => (
-                        <div key={key} style={styles.section}>
-                            <h2>{key.toUpperCase()}</h2>
-                            <textarea
-                                value={formData[key]}
-                                onChange={(e) => handleTextareaChange(e, key)}
-                                style={styles.textarea}
-                            />
-                            <div style={styles.centeredButtonContainer}>
-                                <button style={styles.button} onClick={() => handleGenerate(key)} disabled={!responses["Title Of The Lab Experiment"]}>
-                                    {responses[key] ? 'Regenerate' : 'Generate'}
-                                </button>
-                                {editMode[key] && (
-                                    <button style={styles.button} onClick={() => handleSave(key)}>Save</button>
+            <AppBar position="static" style={styles.appBar}>
+                <Toolbar>
+                    <Box display="flex" alignItems="center" flexGrow={1}>
+                        <Avatar alt="User" src="https://cdn.vectorstock.com/i/1000v/01/75/bearded-man-face-male-generic-profile-picture-vector-42000175.jpg" style={styles.avatar} />
+                        <Typography variant="h6" style={styles.userName}>
+                            {userData.firstName} {userData.lastName}
+                        </Typography>
+                    </Box>
+                    <Button variant="contained" style={styles.button} onClick={() => navigate('/dashboard')}>Dashboard</Button>
+                    <Button variant="contained" style={styles.button} onClick={handleLogout}>Logout</Button>
+                </Toolbar>
+            </AppBar>
+
+            <Container maxWidth="lg">
+
+                {!isInitiated && (
+                    <Box display="flex" justifyContent="center" mt={4}>
+                        <Button variant="contained" style={styles.gradientButton} onClick={handleInitiate}>
+                            Create a New Lab Report
+                        </Button>
+                    </Box>
+                )}
+                {isInitiated && (
+                    <>
+                        {Object.keys(promptsData).filter(key => key !== "System").map(key => (
+                            <Paper key={key} elevation={3} style={styles.section}>
+                                <Typography variant="h5">{key.toUpperCase()}</Typography>
+                                <TextField
+                                    variant="outlined"
+                                    fullWidth
+                                    value={formData[key]}
+                                    onChange={(e) => handleTextareaChange(e, key)}
+                                    multiline
+                                    minRows={3}
+                                    maxRows={10}
+                                    inputRef={el => textAreaRefs.current[key] = el}
+                                    style={styles.inputField}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={showAdditionalContexts[key]}
+                                            onChange={() => setShowAdditionalContexts(prev => ({ ...prev, [key]: !prev[key] }))}
+                                        />
+                                    }
+                                    label="Add additional context"
+                                />
+                                {showAdditionalContexts[key] && (
+                                    <TextField
+                                        variant="outlined"
+                                        fullWidth
+                                        value={additionalContexts[key]}
+                                        onChange={(e) => setAdditionalContexts(prev => ({ ...prev, [key]: e.target.value }))}
+                                        placeholder="Enter additional context"
+                                        multiline
+                                        rows={4}
+                                        style={styles.inputField}
+                                    />
                                 )}
-                            </div>
-                            {responses[key] && (
-                                <div style={styles.responseContainer}>
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {responses[key]}
-                                    </ReactMarkdown>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                    <div style={styles.centeredButtonContainer}>
-                        <button style={styles.button} onClick={generatePDF}>Generate PDF</button>
-                    </div>
-                </>
-            )}
-        </div>
-
-
+                                <Box display="flex" justifyContent="center" mt={2}>
+                                    <Button variant="contained" style={styles.gradientButton} onClick={() => handleGenerate(key)}>
+                                        {responses[key] ? 'Regenerate' : 'Generate'}
+                                    </Button>
+                                    {editMode[key] && (
+                                        <Button variant="contained" style={styles.gradientButtonSecondary} onClick={() => handleSave(key)} styles={{ marginLeft: '10px' }}>
+                                            Save
+                                        </Button>
+                                    )}
+                                </Box>
+                                {responses[key] && (
+                                    <Paper elevation={1} style={styles.responseContainer}>
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {responses[key]}
+                                        </ReactMarkdown>
+                                    </Paper>
+                                )}
+                            </Paper>
+                        ))}
+                        <Box display="flex" justifyContent="center" mt={4}>
+                            <Button variant="contained" style={styles.gradientButton} onClick={generatePDF}>
+                                Generate PDF
+                            </Button>
+                        </Box>
+                    </>
+                )}
+            </Container>
+        </Box>
     );
 };
 
 const styles = {
-    container: {
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        width: '100%',
+    appBar: {
+        background: 'linear-gradient(to right, #4A90E2, #9013FE)',
         marginBottom: '20px',
+        width: '100%',
+        borderRadius: '10px',
     },
-    headerRight: {
-        textAlign: 'center',
+    avatar: {
+        marginRight: '10px',
+    },
+    userName: {
+        fontWeight: 'bold',
+    },
+    button: {
+        marginLeft: '10px',
+        background: 'linear-gradient(to right, #4A90E2, #9013FE)',
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    gradientButton: {
+        background: 'linear-gradient(to right, #4A90E2, #9013FE)',
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    gradientButtonSecondary: {
+        background: 'linear-gradient(to right, #4A90E2, #9013FE)',
+        color: '#fff',
+        fontWeight: 'bold',
+        marginLeft: '10px',
     },
     heading: {
-        fontSize: '2rem',
         marginBottom: '20px',
     },
     inputField: {
-        width: '100%',
-        padding: '10px',
-        fontSize: '1rem',
-        borderRadius: '5px',
-        border: '1px solid #ccc',
         marginBottom: '15px',
     },
-    button: {
-        padding: '10px',
-        fontSize: '1rem',
-        borderRadius: '5px',
-        border: 'none',
-        backgroundColor: '#007BFF',
-        color: 'white',
-        cursor: 'pointer',
-        marginRight: '10px',
-    },
-    textarea: {
-        width: '100%',
-        padding: '10px',
-        fontSize: '1rem',
-        borderRadius: '5px',
-        border: '1px solid #ccc',
-        resize: 'none',
-        overflow: 'hidden',
-    },
-    responseContainer: {
-        border: '1px solid #ccc',
-        padding: '10px',
-        marginTop: '10px',
-    },
     section: {
-        width: '100%',
+        padding: '20px',
         marginBottom: '20px',
     },
-    centeredButtonContainer: {
-        display: 'flex',
-        justifyContent: 'center',
+    responseContainer: {
+        padding: '10px',
         marginTop: '10px',
     },
+
     overlay: {
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        background: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black background
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 9999, // Ensures loading screen appears above other content
-        backdropFilter: 'blur(10px)', // Optional: adds blur effect
+        zIndex: 9999,
     },
     spinner: {
-        width: '50px',
-        height: '50px',
-        border: '5px solid rgba(255, 255, 255, 0.3)', // Semi-transparent white border
-        borderTop: '5px solid #007aff', // Cupertino blue border for spinner
+        border: '4px solid rgba(0, 0, 0, 0.1)',
         borderRadius: '50%',
-        animation: 'spin 1s linear infinite', // Spin animation
-    },
-    '@keyframes spin': {
-        '0%': {
-            transform: 'rotate(0deg)',
-        },
-        '100%': {
-            transform: 'rotate(360deg)',
-        },
-    },
-    checkboxContainer: {
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '15px',
+        borderTop: '4px solid #fff',
+        width: '40px',
+        height: '40px',
+        animation: `${spin} 1s linear infinite`,
     },
 };
 

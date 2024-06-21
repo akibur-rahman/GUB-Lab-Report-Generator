@@ -84,8 +84,8 @@ const styles = {
         fontSize: '1rem',
         borderRadius: '5px',
         border: 'none',
-        backgroundColor: '#007BFF',
-        color: 'white',
+        background: 'linear-gradient(to right, #4A90E2, #9013FE)',
+        color: '#fff',
         cursor: 'pointer',
     },
     link: {
