@@ -299,7 +299,7 @@ const ApplicationPage = () => {
             </Container>
 
             <Dialog open={open} onClose={() => setOpen(false)}>
-                <DialogTitle>Enter Cover Page Details</DialogTitle>
+                <DialogTitle align='center'>Enter Cover Page Details</DialogTitle>
                 <DialogContent>
                     <TextField
                         margin="dense"
@@ -424,7 +424,8 @@ const styles = {
         marginRight: '10px',
     },
     userName: {
-        fontWeight: 'bold',
+        fontWeight: 'normal',
+        fontFamily: 'Poppins',
     },
     button: {
         marginLeft: '10px',
