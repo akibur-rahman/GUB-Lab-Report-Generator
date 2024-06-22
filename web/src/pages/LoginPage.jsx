@@ -56,7 +56,7 @@ const LoginPage = () => {
                 <button type="submit" style={styles.button}>Login</button>
             </form>
             <span style={styles.link}>
-                Forgot Password? Enter email and click
+                Forgot Password?
                 <button style={styles.resetPasswordText} onClick={handleResetPassword}>reset</button>
             </span>
             <div style={styles.link}>
@@ -108,7 +108,6 @@ const styles = {
     link: {
         marginTop: '10px',
         fontSize: '1rem',
-        //allign text in center
         textAlign: 'center',
     },
     signupText: {
@@ -124,7 +123,7 @@ const styles = {
         cursor: 'pointer',
         background: 'none',
         border: 'none',
-        fontSize: '1.1rem',
+        fontSize: '1rem',
 
 
     },

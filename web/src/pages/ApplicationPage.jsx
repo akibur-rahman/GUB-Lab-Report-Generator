@@ -292,7 +292,7 @@ const ApplicationPage = () => {
                             </Paper>
                         ))}
                         <Box display="flex" justifyContent="center" mt={4}>
-                            <Button variant="contained" style={styles.gradientButton} onClick={handleGeneratePDF}>
+                            <Button variant="contained" style={styles.GenegratePDFgradientButton} onClick={handleGeneratePDF}>
                                 Generate PDF
                             </Button>
                         </Box>
@@ -448,6 +448,16 @@ const styles = {
         color: '#fff',
         fontWeight: 'bold',
         marginLeft: '10px',
+    },
+    GenegratePDFgradientButton: {
+        background: 'linear-gradient(to right, #4A90E2, #9013FE)',
+        color: '#fff',
+        fontWeight: 'bold',
+        marginLeft: '10px',
+        marginBottom: '100px',
+        marginTop: '30px',
+        paddingLeft: '100px',
+        paddingRight: '100px',
     },
     heading: {
         marginBottom: '20px',
