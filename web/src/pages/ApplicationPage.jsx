@@ -214,7 +214,7 @@ const ApplicationPage = () => {
             <AppBar position="static" style={styles.appBar}>
                 <Toolbar>
                     <Box display="flex" alignItems="center" flexGrow={1}>
-                        <Avatar alt="User" src="https://cdn.vectorstock.com/i/1000v/01/75/bearded-man-face-male-generic-profile-picture-vector-42000175.jpg" style={styles.avatar} />
+                        <Avatar alt="User" src="https://cdn.dribbble.com/users/1632728/screenshots/4693038/profilepic_dribbble.gif" style={styles.avatar} />
                         <Typography variant="h6" style={styles.userName}>
                             {userData.firstName} {userData.lastName}
                         </Typography>
@@ -421,11 +421,14 @@ const styles = {
         borderRadius: '10px',
     },
     avatar: {
+        width: '50px',
+        height: '50px',
+        borderRadius: '50%',
         marginRight: '10px',
     },
     userName: {
-        fontWeight: 'normal',
-        fontFamily: 'Poppins',
+        fontWeight: 'bold',
+        fontFamily: 'cursive',
     },
     button: {
         marginLeft: '10px',

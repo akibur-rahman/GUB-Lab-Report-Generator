@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { get, ref, set } from '../services/firebase';
 import { auth } from '../services/firebase';
 import { getDatabase } from 'firebase/database';
-import { useNavigate } from 'react-router-dom';
 import { TextField, Button, CircularProgress, Container, Typography, Box, Paper, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
@@ -12,7 +11,6 @@ const DashboardPage = () => {
     const [apiKey, setApiKey] = useState('');
     const [loading, setLoading] = useState(true);
     const [showApiKey, setShowApiKey] = useState(false);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchApiKey = async () => {
@@ -83,10 +81,10 @@ const DashboardPage = () => {
                     <Typography variant="h5">How to Fetch a Gemini API Key</Typography>
                     <ul>
                         <li>Log in to your <a href='https://ai.google.dev/aistudio'>Google AI Studio </a></li>
-                        <li>Now login with your google account</li>
                         <li>Click On Get API Key</li>
                         <li>Generate a new API key.</li>
                         <li>Copy the API key and paste it in the above field.</li>
+                        <li>Click on Save API Key Button</li>
                     </ul>
                 </Paper>
                 <Paper elevation={3} style={{ padding: '20px' }}>
