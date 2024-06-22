@@ -152,6 +152,7 @@ const ApplicationPage = () => {
             setConversationHistory(prevHistory => [...prevHistory, { sender: 'Human', text: systemPrompt }, { sender: 'AI', text: response }]);
         } catch (error) {
             console.error(error);
+            alert('Error initiating!!! Check your API Key in the dashboard. If you are using the app for the first time, Plese add the API Key in the dashboard.');
         } finally {
             setLoading(false);
         }
