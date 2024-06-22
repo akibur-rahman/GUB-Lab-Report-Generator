@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/authService';
+import { login, resetPassword } from '../services/authService';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -11,6 +11,19 @@ const LoginPage = () => {
         e.preventDefault();
         try {
             await login(email, password, navigate);
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+    const handleResetPassword = async () => {
+        if (!email) {
+            alert('Please enter your email address');
+            return;
+        }
+        try {
+            await resetPassword(email);
+            alert('Password reset email sent. Please check your inbox.');
         } catch (error) {
             alert(error.message);
         }
@@ -42,6 +55,10 @@ const LoginPage = () => {
                 </div>
                 <button type="submit" style={styles.button}>Login</button>
             </form>
+            <span style={styles.link}>
+                Forgot Password? Enter email and click
+                <button style={styles.resetPasswordText} onClick={handleResetPassword}>reset</button>
+            </span>
             <div style={styles.link}>
                 Don't have an account? <button style={styles.signupText} onClick={() => navigate('/signup')}>Sign Up</button>
             </div>
@@ -89,8 +106,10 @@ const styles = {
         cursor: 'pointer',
     },
     link: {
-        marginTop: '20px',
+        marginTop: '10px',
         fontSize: '1rem',
+        //allign text in center
+        textAlign: 'center',
     },
     signupText: {
         color: '#007BFF',
@@ -99,6 +118,15 @@ const styles = {
         border: 'none',
         padding: '0',
         fontSize: '1rem',
+    },
+    resetPasswordText: {
+        color: '#007BFF',
+        cursor: 'pointer',
+        background: 'none',
+        border: 'none',
+        fontSize: '1.1rem',
+
+
     },
 };
 

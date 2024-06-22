@@ -1,5 +1,5 @@
 // authService.js
-import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from './firebase';
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from './firebase';
 import { set, ref, database } from './firebase';
 
 export const signup = async (firstName, lastName, email, password) => {
@@ -27,6 +27,15 @@ export const login = async (email, password, navigate) => {
         const user = userCredential.user;
         console.log('User logged in:', user);
         navigate('/app'); // Redirect to the application page after successful login
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
+
+export const resetPassword = async (email) => {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        console.log('Password reset email sent');
     } catch (error) {
         throw new Error(error.message);
     }

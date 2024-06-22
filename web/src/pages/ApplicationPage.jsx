@@ -227,11 +227,13 @@ const ApplicationPage = () => {
             <Container maxWidth="lg">
 
                 {!isInitiated && (
-                    <Box display="flex" justifyContent="center" mt={4}>
+
+                    <Box display="flex" justifyContent="center" paddingTop='350px' mt={4}>
                         <Button variant="contained" style={styles.gradientButton} onClick={handleInitiate}>
                             Create a New Lab Report
                         </Button>
                     </Box>
+
                 )}
                 {isInitiated && (
                     <>
