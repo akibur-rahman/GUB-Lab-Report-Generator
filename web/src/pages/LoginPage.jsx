@@ -12,7 +12,7 @@ const LoginPage = () => {
         try {
             await login(email, password, navigate);
         } catch (error) {
-            console.error('Login failed:', error.message);
+            alert(error.message);
         }
     };
 

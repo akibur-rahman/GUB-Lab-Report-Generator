@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Typography, Paper, TextField, Button, Box, AppBar, Toolbar, Avatar, Checkbox, FormControlLabel } from '@mui/material';
+import {
+    Container, Typography, Paper, TextField, Button, Box, AppBar, Toolbar, Avatar, Checkbox, FormControlLabel, Dialog, DialogActions, DialogContent, DialogTitle
+} from '@mui/material';
 import { generateAiResponse } from '../services/chatService';
 import { logout } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
@@ -58,6 +60,23 @@ const ApplicationPage = () => {
     const textAreaRefs = useRef({});
     const navigate = useNavigate();
 
+    const [open, setOpen] = useState(false);
+    const [pdfFormData, setPdfFormData] = useState({
+        departmentName: '',
+        semester: '',
+        labReportNo: '',
+        courseTitle: '',
+        courseCode: '',
+        section: '',
+        labExperimentName: '',
+        studentName: '',
+        studentId: '',
+        labDate: '',
+        submissionDate: '',
+        courseTeacherName: ''
+    });
+
+
     useEffect(() => {
         const initialFormData = {};
         const initialEditMode = {};
@@ -91,12 +110,15 @@ const ApplicationPage = () => {
                         localStorage.setItem('userData', JSON.stringify(parsedUserData));
                     } else {
                         console.warn('User data not found for user:', user.uid);
+                        alert('User data not found');
                     }
                 } catch (error) {
                     console.error('Error fetching user data:', error);
+                    alert('Error fetching user data');
                 }
             } else {
                 console.warn('User is not authenticated');
+                //alert('User is not authenticated');
             }
         };
         fetchUserData();
@@ -146,7 +168,17 @@ const ApplicationPage = () => {
         navigate('/login');
     };
 
-    const generatePDF = () => {
+    const handleGeneratePDF = () => {
+        setOpen(true);
+    };
+
+    const handlePdfFormChange = (e) => {
+        const { name, value } = e.target;
+        setPdfFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleDownloadPDF = () => {
+        setOpen(false);
         const formattedResponses = Object.keys(promptsData).reduce((acc, key) => {
             if (responses[key]) {
                 acc[key] = {
@@ -157,7 +189,7 @@ const ApplicationPage = () => {
             return acc;
         }, {});
 
-        generatePDFService(formattedResponses);
+        generatePDFService(formattedResponses, pdfFormData);
     };
 
     const handleTextareaChange = (e, key) => {
@@ -258,14 +290,126 @@ const ApplicationPage = () => {
                             </Paper>
                         ))}
                         <Box display="flex" justifyContent="center" mt={4}>
-                            <Button variant="contained" style={styles.gradientButton} onClick={generatePDF}>
+                            <Button variant="contained" style={styles.gradientButton} onClick={handleGeneratePDF}>
                                 Generate PDF
                             </Button>
                         </Box>
                     </>
                 )}
             </Container>
+
+            <Dialog open={open} onClose={() => setOpen(false)}>
+                <DialogTitle>Enter Cover Page Details</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        margin="dense"
+                        name="departmentName"
+                        label="Department Name"
+                        fullWidth
+                        value={pdfFormData.departmentName}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="semester"
+                        label="Semester"
+                        fullWidth
+                        value={pdfFormData.semester}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="labReportNo"
+                        label="Lab Report No"
+                        fullWidth
+                        value={pdfFormData.labReportNo}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="courseTitle"
+                        label="Course Title"
+                        fullWidth
+                        value={pdfFormData.courseTitle}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="courseCode"
+                        label="Course Code"
+                        fullWidth
+                        value={pdfFormData.courseCode}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="section"
+                        label="Section"
+                        fullWidth
+                        value={pdfFormData.section}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="labExperimentName"
+                        label="Lab Experiment Name"
+                        fullWidth
+                        value={pdfFormData.labExperimentName}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="studentName"
+                        label="Student Name"
+                        fullWidth
+                        value={pdfFormData.studentName}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="studentId"
+                        label="Student ID"
+                        fullWidth
+                        value={pdfFormData.studentId}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="labDate"
+                        label="Lab Date"
+                        fullWidth
+                        value={pdfFormData.labDate}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="submissionDate"
+                        label="Submission Date"
+                        fullWidth
+                        value={pdfFormData.submissionDate}
+                        onChange={handlePdfFormChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="courseTeacherName"
+                        label="Course Teacher Name"
+                        fullWidth
+                        value={pdfFormData.courseTeacherName}
+                        onChange={handlePdfFormChange}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpen(false)} color="primary">
+                        Cancel
+                    </Button>
+                    <Button style={styles.gradientButton} onClick={handleDownloadPDF} color="primary">
+                        Download PDF
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
+
+
     );
 };
 

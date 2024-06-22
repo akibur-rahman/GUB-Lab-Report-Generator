@@ -23,6 +23,7 @@ const SignupPage = () => {
             navigate('/login');
         } catch (err) {
             setError(err.message);
+            alert(err.message);
             setLoading(false);
         }
     };
