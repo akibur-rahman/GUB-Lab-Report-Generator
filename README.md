@@ -16,3 +16,6 @@ npm install jspdf
 npm install jspdf-autotable
 npm install marked
 ```
+
+# Live
+demo: https://gub-labreportgen-by-akib.netlify.app/
