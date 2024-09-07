@@ -1,5 +1,5 @@
 # GUB Lab Report Generator
- Generates lab reports automatically with Gemini. EZPZ
+ Generates lab reports automatically with Gemini. You can directly export the report as a PDF. Enjoy!!!
 
 # How to run locally:
 ```bash
