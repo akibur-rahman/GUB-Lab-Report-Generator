@@ -1,21 +1,12 @@
 # GUB Lab Report Generator
- Generates lab reports automatically with AI. EZPZ
+ Generates lab reports automatically with Gemini. EZPZ
 
-# NPM Packages:
+# How to run locally:
 ```bash
-npm install react-router-dom
-npm install firebase
-npm install react-markdown
-npm install remark-gfm
-npm install @google/generative-ai
-npm install @emotion/styled
-npm install @emotion/react
-npm install @mui/material
-npm install @mui/icons-material
-npm install jspdf
-npm install jspdf-autotable
-npm install marked
+git clone <ripository git>
+cd GUB-Lab-Report-Generator
+npm install
+npm start
 ```
 
-# Live
-demo: https://gub-labreportgen-by-akib.netlify.app/
+# Live: https://gub-labreportgen-by-akib.netlify.app
